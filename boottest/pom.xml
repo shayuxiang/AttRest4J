@@ -41,7 +41,7 @@
           <artifactId>attrest4j</artifactId>
           <version>0.0.1-SNAPSHOT</version>
           <scope>system</scope>
-          <systemPath>${project.basedir}/../AttRest4J/target/attrest4j-0.0.1-SNAPSHOT.jar</systemPath>
+          <systemPath>${project.basedir}/../core/target/attrest4j-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
 		
 		<dependency>
