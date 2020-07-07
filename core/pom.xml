@@ -11,8 +11,8 @@
 	<groupId>org.attrest</groupId>
 	<artifactId>attrest4j</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>attrest4j</name>
+	<description>the package for build rest-api quikely</description>
 
 	<properties>
 		<java.version>1.8</java.version>
