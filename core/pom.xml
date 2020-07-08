@@ -8,7 +8,7 @@
 		<version>2.3.1.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.attrest</groupId>
+	<groupId>online.attrest</groupId>
 	<artifactId>attrest4j</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>attrest4j</name>
