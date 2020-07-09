@@ -72,4 +72,4 @@ function getName(id){
 
 > npm:
 
- 7. **配置**
+ 8. **配置**
