@@ -8,6 +8,15 @@ public class LocalApi
     private String comment;
     private String action;
     private String params;
+    private String _return;
+
+    public String get_return() {
+        return _return;
+    }
+
+    public void set_return(String _return) {
+        this._return = _return;
+    }
 
     //API是否一致
     private boolean exist;

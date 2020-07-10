@@ -10,6 +10,7 @@ import online.attrest.core._enum.DriverMode;
 
 public class AttRestCore {
 
+   public static LocalApiList localApiList;
 
    /**
     * 获取API-DOM结构

@@ -52,8 +52,10 @@ public class AttrestController {
     @GetMapping(path="getmode")
     @AttDescription("获取Attrest工作模式,frontfirst:前端优先;backendfirst:后台优先;duplex:双工模式")
     public String getMode(){
-        if(setting.getDriverMode()== DriverMode.FrontFirst)  return "frontfirst";
-        if(setting.getDriverMode()== DriverMode.Duplex)  return "duplex";
+        if(setting.getDriverMode()== DriverMode.FrontFirst)  
+        return "frontfirst";
+        if(setting.getDriverMode()== DriverMode.Duplex)  
+        return "duplex";
         return "backendfirst";
     }
 
@@ -75,7 +77,7 @@ public class AttrestController {
                         boolean param_check_result = true;
                         ischecked = true;
                         String paramString = local.getParams();
-                        if(paramString.trim().equals("")){
+                        if(paramString==null || paramString.trim().equals("")){
                             param_check_result = serv.getParamTypes().size()==0?true:false;
                         }else{
                             for(String pname : paramString.split(","))
@@ -109,12 +111,14 @@ public class AttrestController {
             });
         }
         //返回给客户端验证结果,以配合代码生成
+        AttRestCore.localApiList  = new LocalApiList();
+        AttRestCore.localApiList.setLocalApis(result);
         return result;
     }
 
-    @GetMapping(path = "/get")
+    @GetMapping(path = "/getscript")
     @AttDescription("获取自动生成的前端API调用脚本")
-    public void Get() {
+    public void GetScript() {
         AttRestCore.ResponseScript(response, "gbk",setting.getDriverMode());
     }
 }

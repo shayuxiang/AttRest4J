@@ -15,7 +15,7 @@ public class BasicSetting {
         this.isCheckedApi = _isCheckedApi;
         if(mode.toLowerCase().equals("duplex")){
             driverMode = DriverMode.Duplex;
-        }else if(mode.toLowerCase().equals("")){
+        }else if(mode.toLowerCase().equals("frontfirst")){
             driverMode = DriverMode.FrontFirst;
         }else {
             driverMode = DriverMode.BackendFirst;

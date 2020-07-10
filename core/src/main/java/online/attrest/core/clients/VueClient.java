@@ -13,6 +13,8 @@ import online.attrest.core.codetype.FieldModel;
 import online.attrest.core.codetype.ParamTypeEntity;
 import online.attrest.core.codetype.RouteAnaly;
 import online.attrest.core.interfaces.IClientCode;
+import online.attrest.core.util.AttRestCore;
+import online.attrest.core.util.LocalApi;
 
 public class VueClient implements IClientCode {
 
@@ -106,11 +108,45 @@ public class VueClient implements IClientCode {
      * @return
      */
     private String ToAPI(DriverMode mode) {
-        List<List<ApiModel>> groupList = new ArrayList<>();
-        if (mode == DriverMode.BackendFirst) { //后台模式,会将后台接口直接返给前端
 
+        if (mode == DriverMode.BackendFirst) { 
+            //后台模式,会将后台所有可用接口直接返给前端
+            return buildApiCode(SpringExt.apiEnumerable.ApiModels);
+        }
+       
+        else if(mode == DriverMode.FrontFirst){ 
+            //前端模式，会读取已验证通过核对的接口进行返回，未通过的不返回
+            if(AttRestCore.localApiList == null) return "";
+            ArrayList<ApiModel> returnAPI = new ArrayList<ApiModel>();
+            for(LocalApi localApi : AttRestCore.localApiList.getLocalApis()){
+                if(localApi.isExist()){
+                    SpringExt.apiEnumerable.ApiModels.forEach(a->{
+                        if(a.getControllerName().toLowerCase().equals(localApi.getRoute().toLowerCase()) 
+                        && a.getActionName().toLowerCase().equals(localApi.getAction().toLowerCase())){
+                            returnAPI.add(a);
+                        }
+                    });
+                }
+            }
+
+            return buildApiCode(returnAPI);
+        }
+        else{ //双工模式,会将后台所有接口返回前端，同时取得前端有但后台没有接口返回
+
+        }
+        return "";
+    }
+
+    /**
+     * 构建API客户端代码
+     * @param apis
+     * @return
+     */
+    private String buildApiCode(ArrayList<ApiModel> apis){
+           if(apis.size() == 0) return "";
+            List<List<ApiModel>> groupList = new ArrayList<>();
             // 对所有api接口进行分组
-            SpringExt.apiEnumerable.ApiModels.stream()
+            apis.stream()
                     .collect(Collectors.groupingBy(ApiModel::getControllerName, Collectors.toList()))
                     .forEach((name, fooList) -> {
                         groupList.add(fooList);
@@ -164,15 +200,7 @@ public class VueClient implements IClientCode {
             });
 
             return vue_api.toString().substring(0, vue_api.length() - 1) + ";";
-        }
-       
-        else if(mode == DriverMode.FrontFirst){ //前端模式，会读取已验证通过的接口进行返回，未通过的不返回
 
-        }
-        else{ //双工模式,会将后台所有接口返回前端，同时取得前端有但后台没有接口返回
-
-        }
-        return "";
     }
 
     @Override
