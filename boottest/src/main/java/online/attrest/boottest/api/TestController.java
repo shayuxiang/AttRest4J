@@ -5,8 +5,8 @@ import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletResponse;
 
-import online.attrest.core.AttRestCore;
 import online.attrest.core.codetype.AttDescription;
+import online.attrest.core.util.AttRestCore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,11 +25,9 @@ public class TestController {
     @Autowired
     public HttpServletResponse response;
 
-    @GetMapping(path = "/Get1")
     @RequestMapping(method = RequestMethod.GET, path = "/get")
     @AttDescription("这是一个测试的标注")
     public void Get() {
-        AttRestCore.ResponseScript(response, "gbk");
     }
 
     @GetMapping(value = "/Get2")

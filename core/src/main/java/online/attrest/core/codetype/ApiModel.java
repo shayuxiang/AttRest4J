@@ -116,6 +116,21 @@ public class ApiModel {
         ParamTypes = paramTypes;
     }
 
+    /**
+     * 是否存在指定名称的参数
+     * @return
+     */
+    public boolean hasParamName(String paramName){
+        boolean isExit = false;
+        if(paramName.equals("")) return true;
+        for(ParamTypeEntity p:ParamTypes)
+        {
+            if (p.getName().equals(paramName))
+                isExit = true;
+        }
+        return isExit;
+    }   
+
     /** 方法返回的类型 */
     private Class<?> ReturnType;
 
