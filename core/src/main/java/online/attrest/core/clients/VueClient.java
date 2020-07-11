@@ -109,7 +109,7 @@ public class VueClient implements IClientCode {
      */
     private String ToAPI(DriverMode mode) {
 
-        if (mode == DriverMode.BackendFirst) { 
+        if (mode == DriverMode.BackendFirst || mode == DriverMode.Duplex) { 
             //后台模式,会将后台所有可用接口直接返给前端
             return buildApiCode(SpringExt.apiEnumerable.ApiModels);
         }
