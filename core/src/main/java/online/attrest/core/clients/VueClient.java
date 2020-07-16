@@ -6,36 +6,34 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import online.attrest.core.SpringExt;
+import online.attrest.core._enum.DriverMode;
 import online.attrest.core.codetype.ApiModel;
 import online.attrest.core.codetype.EntityModel;
 import online.attrest.core.codetype.FieldModel;
 import online.attrest.core.codetype.ParamTypeEntity;
 import online.attrest.core.codetype.RouteAnaly;
 import online.attrest.core.interfaces.IClientCode;
+import online.attrest.core.util.AttRestCore;
+import online.attrest.core.util.LocalApi;
 
 public class VueClient implements IClientCode {
 
-    private String Host = ""; 
+    private String Host = "";
     private String area = "";
 
     /**
      * 生成vue代码
      */
     @Override
-    public String ToCode() {
+    public String ToCode(DriverMode mode) {
         StringBuilder sb = new StringBuilder();
-        String api = ToAPI();
+        String api = ToAPI(mode);
         String _enum = ToEnum();
         String entity = ToEntity();
         String returnOjb = " return function(){this.Vue = that.Vue;}";
-        String ret = sb.append(
-                "this.Vue = function(vue,axios){ vue.prototype.$api = {};")
+        String ret = sb.append("this.Vue = function(vue,axios){ vue.prototype.$api = {};")
                 .append("vue.prototype.$enum = {};vue.prototype.$entity= {};var that = this;that.ErrorCatch = null; ")
-                .append(api)
-                .append(_enum)
-                .append(entity)
-                .append(returnOjb)
-                .append("};").toString();
+                .append(api).append(_enum).append(entity).append(returnOjb).append("};").toString();
         return ret;
     }
 
@@ -57,14 +55,10 @@ public class VueClient implements IClientCode {
                 // 自定义类型
                 if (param.getFieldType().equals(String.class)) {
                     defaultValue = "''";
-                } else if (param.getFieldType().equals(Integer.class) 
-                    || param.getFieldType().equals(int.class)
-                    || param.getFieldType().equals(Double.class)
-                    || param.getFieldType().equals(double.class)
-                    || param.getFieldType().equals(Long.class) 
-                    || param.getFieldType().equals(long.class) 
-                    || param.getFieldType().equals(Float.class)
-                    || param.getFieldType().equals(float.class)) {
+                } else if (param.getFieldType().equals(Integer.class) || param.getFieldType().equals(int.class)
+                        || param.getFieldType().equals(Double.class) || param.getFieldType().equals(double.class)
+                        || param.getFieldType().equals(Long.class) || param.getFieldType().equals(long.class)
+                        || param.getFieldType().equals(Float.class) || param.getFieldType().equals(float.class)) {
                     defaultValue = "0";
                 } else if (param.getFieldType().isArray()) {
                     defaultValue = "[]";
@@ -113,62 +107,100 @@ public class VueClient implements IClientCode {
      * 
      * @return
      */
-    private String ToAPI() {
-        List<List<ApiModel>> groupList = new ArrayList<>();
-        // 对所有api接口进行分组
-        SpringExt.apiEnumerable.ApiModels.stream()
-                .collect(Collectors.groupingBy(ApiModel::getControllerName, Collectors.toList()))
-                .forEach((name, fooList) -> {
-                    groupList.add(fooList);
+    private String ToAPI(DriverMode mode) {
+
+        if (mode == DriverMode.BackendFirst || mode == DriverMode.Duplex) { 
+            //后台模式,会将后台所有可用接口直接返给前端
+            return buildApiCode(SpringExt.apiEnumerable.ApiModels);
+        }
+       
+        else if(mode == DriverMode.FrontFirst){ 
+            //前端模式，会读取已验证通过核对的接口进行返回，未通过的不返回
+            if(AttRestCore.localApiList == null) return "";
+            ArrayList<ApiModel> returnAPI = new ArrayList<ApiModel>();
+            for(LocalApi localApi : AttRestCore.localApiList.getLocalApis()){
+                if(localApi.isExist()){
+                    SpringExt.apiEnumerable.ApiModels.forEach(a->{
+                        if(a.getControllerName().toLowerCase().equals(localApi.getRoute().toLowerCase()) 
+                        && a.getActionName().toLowerCase().equals(localApi.getAction().toLowerCase())){
+                            returnAPI.add(a);
+                        }
+                    });
+                }
+            }
+
+            return buildApiCode(returnAPI);
+        }
+        else{ //双工模式,会将后台所有接口返回前端，同时取得前端有但后台没有接口返回
+
+        }
+        return "";
+    }
+
+    /**
+     * 构建API客户端代码
+     * @param apis
+     * @return
+     */
+    private String buildApiCode(ArrayList<ApiModel> apis){
+           if(apis.size() == 0) return "";
+            List<List<ApiModel>> groupList = new ArrayList<>();
+            // 对所有api接口进行分组
+            apis.stream()
+                    .collect(Collectors.groupingBy(ApiModel::getControllerName, Collectors.toList()))
+                    .forEach((name, fooList) -> {
+                        groupList.add(fooList);
+                    });
+            StringBuilder vue_api = new StringBuilder();
+            StringBuilder vue_api_list = new StringBuilder();
+
+            groupList.forEach((apiList) -> {
+                if (apiList.size() <= 0) {
+                    return;
+                } // 错误判断，一般不会出现
+                vue_api_list.append("'" + apiList.get(0).getControllerName().replace("Controller", "") + "',");
+                // 固定区域选项,即用于微服务的前缀
+                this.area = apiList.get(0).getArea() == null || apiList.get(0).getArea().trim() == "" ? ""
+                        : apiList.get(0).getArea() + "_";
+                StringBuilder methods = new StringBuilder();
+
+                apiList.forEach((method) -> {
+                    RouteAnaly routeAnaly = new RouteAnaly(method.getArea(), method.getRouteFilter(),
+                            method.getControllerName(), method.getActionName(), method.getActionRouteFilter());
+                    String link = "'" + Host + "' + '" + routeAnaly.getLink() + "'";
+                    // 参数整理
+                    String _params = "";
+                    String data = "";
+                    for (ParamTypeEntity p : method.getParamTypes()) {
+                        _params += p.getName() + ",";
+                        data += p.getName() + ":" + p.getName() + ",";
+                    }
+                    if (data.length() > 0) {
+                        data = "{" + data.substring(0, data.length() - 1) + "}";
+                    } else {
+                        data = "{}";
+                    }
+                    String methodRequestMethod = method.getRequestMethod().toLowerCase();
+                    String DataType = methodRequestMethod.equals("get") ? "param" : "data";
+                    // API方法构建
+                    StringBuilder vue_method = new StringBuilder();
+                    vue_method.append(method.getActionName() + ":function(" + _params + "callback){")
+                            .append("axios." + methodRequestMethod + "(" + link + ",{")
+                            .append(" " + DataType + ":" + data).append(" }).catch(function(error){ ")
+                            .append("  if(that.ErrorCatch!=null && that.ErrorCatch!=undefined){ ")
+                            .append("that.ErrorCatch(error,\""
+                                    + apiList.get(0).getControllerName().replace("Controller", "") + "-"
+                                    + method.getActionName() + "\");")
+                            .append("}}).then(function(res){  callback(res); })},");
+                    methods.append(vue_method);
                 });
-        StringBuilder vue_api = new StringBuilder();
-        StringBuilder vue_api_list = new StringBuilder();
-
-        groupList.forEach((apiList) -> {
-            if (apiList.size() <= 0) {
-                return;
-            } // 错误判断，一般不会出现
-            vue_api_list.append("'" + apiList.get(0).getControllerName().replace("Controller", "") + "',");
-            // 固定区域选项,即用于微服务的前缀
-            this.area = apiList.get(0).getArea() == null || apiList.get(0).getArea().trim() == "" ? ""
-                    : apiList.get(0).getArea() + "_";
-            StringBuilder methods = new StringBuilder();
-
-            apiList.forEach((method) -> {
-                RouteAnaly routeAnaly = new RouteAnaly(method.getArea(), method.getRouteFilter(),
-                        method.getControllerName(), method.getActionName(), method.getActionRouteFilter());
-                String link = "'" + Host + "' + '" + routeAnaly.getLink() + "'";
-                // 参数整理
-                String _params = "";
-                String data = "";
-                for (ParamTypeEntity p : method.getParamTypes()) {
-                    _params += p.getName() + ",";
-                    data += p.getName() + ":" + p.getName() + ",";
-                }
-                if (data.length() > 0) {
-                    data = "{" + data.substring(0, data.length() - 1) + "}";
-                } else {
-                    data = "{}";
-                }
-                String methodRequestMethod = method.getRequestMethod().toLowerCase();
-                String DataType = methodRequestMethod.equals("get")?"params":"data";
-                // API方法构建
-                StringBuilder vue_method = new StringBuilder();
-                vue_method.append(method.getActionName() + ":function(" + _params + "callback){")
-                        .append("axios." + methodRequestMethod + "(" + link + ",{").append(" " +  DataType+":" + data)
-                        .append(" }).catch(function(error){ ")
-                        .append("  if(that.ErrorCatch!=null && that.ErrorCatch!=undefined){ ")
-                        .append("that.ErrorCatch(error,\""
-                                + apiList.get(0).getControllerName().replace("Controller", "") + "-"
-                                + method.getActionName() + "\");")
-                        .append("}}).then(function(res){  callback(res); })},");
-                methods.append(vue_method);
+                vue_api.append(
+                        "  vue.prototype.$api." + area + apiList.get(0).getControllerName().replace("Controller", "")
+                                + " = {" + methods.toString().substring(0, methods.length() - 1) + "},");
             });
-            vue_api.append("  vue.prototype.$api." + area + apiList.get(0).getControllerName().replace("Controller", "")
-                    + " = {" + methods.toString().substring(0, methods.length() - 1) + "},");
-        });
-        // vue_api_list = vue_api_list.Substring(0, vue_api_list.Length - 1);
-        return vue_api.toString().substring(0, vue_api.length() - 1) + ";";
+
+            return vue_api.toString().substring(0, vue_api.length() - 1) + ";";
+
     }
 
     @Override

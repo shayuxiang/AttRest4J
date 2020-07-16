@@ -1,4 +1,4 @@
-package online.attrest.core;
+package online.attrest.core.util;
 
 import online.attrest.core._enum.AttClientFrame;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,9 +21,12 @@ public class AttRestConfig
     @Value("${attrest.host}")
     private String Host;
 
+    @Value("${attrest.mode}")
+    private String mode;
+
     @Bean
     public  BasicSetting getBasicSetting(){
-        BasicSetting setting = new BasicSetting(Host, CheckAPI);
+        BasicSetting setting = new BasicSetting(Host, CheckAPI,mode);
         return setting;
     }
 

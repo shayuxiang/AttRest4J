@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import online.attrest.core.SpringExt;
+import online.attrest.core._enum.DriverMode;
 import online.attrest.core.codetype.ApiModel;
 import online.attrest.core.codetype.EntityModel;
 import online.attrest.core.codetype.FieldModel;
@@ -22,7 +23,7 @@ public class AngularClient implements IClientCode {
      * 生成angular代码
      */
     @Override
-    public String ToCode() {
+    public String ToCode(DriverMode mode) {
         StringBuilder sb = new StringBuilder();
         String api = ToAPI();
         String _enum = ToEnum();

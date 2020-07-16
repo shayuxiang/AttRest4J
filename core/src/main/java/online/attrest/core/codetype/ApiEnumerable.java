@@ -5,9 +5,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import online.attrest.core.BasicSetting;
 import online.attrest.core.SpringExt;
+import online.attrest.core.util.BasicSetting;
 import online.attrest.core._enum.AttClientFrame;
+import online.attrest.core._enum.DriverMode;
 import online.attrest.core.interfaces.ClientCodeFactory;
 import online.attrest.core.interfaces.IClientCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +40,12 @@ public class ApiEnumerable {
     public ArrayList<EntityModel> EnumModels = new ArrayList<EntityModel>();
 
     /** 根据不同类型的客户端生成本地代码 */
-    public String ToCode() {
+    public String ToCode(DriverMode mode) {
         ArrayList<IClientCode> codeClient = ClientCodeFactory.getInstance().GetCodeBuilder(attCodeType);
         String retstr = "";
         for (IClientCode client : codeClient) {
             client.SetHost(setting.getHost());
-            retstr += client.ToCode();
+            retstr += client.ToCode(mode);
         }
         return "function AttClient(){" + retstr + "}";
     }

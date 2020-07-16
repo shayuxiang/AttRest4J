@@ -82,7 +82,8 @@ public class SpringExt implements ApplicationContextAware {
                             RequestMapping rq = method.getAnnotation(RequestMapping.class);
                             // 这里不认可多路径，客户端只认第一个路径
                             apiModel.setActionRouteFilter(GetPathOrValue(rq));
-                            apiModel.setRequestMethod(rq.method()[0].name());
+                            String me = rq.method().length>0?rq.method()[0].name():"";
+                            apiModel.setRequestMethod(me);
                             isAddMethod = true;
                             // 添加到内存
                             apiEnumerable.ApiModels.add(apiModel);

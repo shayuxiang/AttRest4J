@@ -1,11 +1,16 @@
-package online.attrest.core;
+package online.attrest.core.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import online.attrest.core.SpringExt;
+import online.attrest.core._enum.DriverMode;
+
 public class AttRestCore {
+
+   public static LocalApiList localApiList;
 
    /**
     * 获取API-DOM结构
@@ -31,8 +36,8 @@ public class AttRestCore {
     * 
     * @param HttpContext
     */
-   public static void ResponseScript(HttpServletResponse response) {
-      ResponseScript(response, "gbk");
+   public static void ResponseScript(HttpServletResponse response,DriverMode mode) {
+      ResponseScript(response, "gbk", mode);
    }
 
    /**
@@ -41,9 +46,9 @@ public class AttRestCore {
     * @param HttpContext
     * @param encoding
     */
-   public static void ResponseScript(HttpServletResponse response, String encoding) {
+   public static void ResponseScript(HttpServletResponse response, String encoding,DriverMode mode) {
       // 生成代码
-      String code = SpringExt.apiEnumerable.ToCode();
+      String code = SpringExt.apiEnumerable.ToCode(mode);
       // 向浏览器返回HttpResponse
       try {
          // response.getWriter().println(code);

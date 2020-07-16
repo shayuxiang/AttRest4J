@@ -1,6 +1,6 @@
 package online.attrest.core.codetype;
 
-import online.attrest.core.BasicSetting;
+import online.attrest.core.util.BasicSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
