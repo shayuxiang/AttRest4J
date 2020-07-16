@@ -151,7 +151,7 @@ public class VueClient implements IClientCode {
                     data = "{}";
                 }
                 String methodRequestMethod = method.getRequestMethod().toLowerCase();
-                String DataType = methodRequestMethod.equals("get")?"param":"data";
+                String DataType = methodRequestMethod.equals("get")?"params":"data";
                 // API方法构建
                 StringBuilder vue_method = new StringBuilder();
                 vue_method.append(method.getActionName() + ":function(" + _params + "callback){")

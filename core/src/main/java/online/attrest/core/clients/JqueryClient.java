@@ -150,7 +150,7 @@ public class JqueryClient implements IClientCode {
                     data = "{}";
                 }
                 String methodRequestMethod = method.getRequestMethod().toLowerCase();
-                String DataType = methodRequestMethod.equals("get")?"param":"data";
+                String DataType = methodRequestMethod.equals("get")?"params":"data";
                 // API方法构建
                 StringBuilder jquery_method = new StringBuilder();
                 jquery_method.append(method.getActionName() + ":function(" + _params + "callback){")
